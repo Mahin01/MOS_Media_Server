@@ -58,6 +58,13 @@ async function run() {
       res.send(result);
     });
 
+    // Insert Add Class data to database by instructor
+    app.post("/classes", async(req, res) => {
+      const singleClass = req.body;
+      const result = await allClassesCollection.insertOne(singleClass);
+      res.send(result);
+    })
+
     // Insert Selected Class Data by Students
     app.post("/selected-class", async (req, res) => {
       const selectedClass = req.body;
@@ -74,7 +81,7 @@ async function run() {
     })
 
     // Delete Class API For deleting single class from classes collection
-    app.delete("classes/:id", async(req, res) => {
+    app.delete("/classes/:id", async(req, res) => {
       const id = req.params.id;
       const query = {_id : new ObjectId(id)};
       const result = await allClassesCollection.deleteOne(query);
