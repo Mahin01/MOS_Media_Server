@@ -73,6 +73,14 @@ async function run() {
       res.send(result);
     })
 
+    // Delete Class API For deleting single class from classes collection
+    app.delete("classes/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)};
+      const result = await allClassesCollection.deleteOne(query);
+      res.send(result);
+    })
+
     // Delete class from My selected class on student dashboard upon clicking the delete button
     app.delete("/selected-class/:id", async(req, res) => {
       const id = req.params.id;
