@@ -1,11 +1,12 @@
 const express = require("express");
-require('dotenv').config()
+require('dotenv').config();
 const app = express();
 const cors = require("cors");
 const port = process.env.PORT || 5000;
 
+// middleware
 app.use(cors());
-app.use(express.json())
+app.use(express.json());
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hcrmfrb.mongodb.net/?retryWrites=true&w=majority`;
@@ -23,23 +24,31 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const database = client.db("mos-media");
-    const usersCollection = database.collection("users");
+    const usersCollection = client.db("mos-media").collection("users");
+    const selectedClassesCollection = client.db("mos-media").collection("selected-class");
+
 
     // Insert Registered User Data 
-    app.post("/users", async(req, res) => {
+    app.post('/users', async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user);
       res.send(result);
+    });
+
+    // Insert Selected Class Data by Students
+    app.post("/selected-class", async (req, res) => {
+      const selectedClass = req.body;
+      const result = await selectedClassesCollection.insertOne(selectedClass);
+      res.send(result);
     })
 
-    
-    // Send a ping to confirm a successful connection
+
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
