@@ -27,6 +27,16 @@ async function run() {
     const usersCollection = client.db("mos-media").collection("users");
     const selectedClassesCollection = client.db("mos-media").collection("selected-class");
 
+    // Fetch selected class data by specific student 
+    app.get("/selected-classes", async (req, res)=> {
+      let query = {};
+      if (req.query?.email) {
+        query = { addedBy : req.query.email }
+        }
+        console.log(query);
+        const result = await selectedClassesCollection.find(query).toArray();
+        res.send(result);
+    })
 
     // Insert Registered User Data 
     app.post('/users', async (req, res) => {
