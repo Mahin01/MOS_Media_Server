@@ -33,7 +33,6 @@ async function run() {
       res.send(result);
     });
 
-
     // Fetch selected class data by specific student 
     app.get("/selected-classes", async (req, res)=> {
       let query = {};
@@ -56,6 +55,14 @@ async function run() {
     app.post("/selected-class", async (req, res) => {
       const selectedClass = req.body;
       const result = await selectedClassesCollection.insertOne(selectedClass);
+      res.send(result);
+    })
+
+    // Api for delete user data by admin from database
+    app.delete("/users/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)};
+      const result = usersCollection.deleteOne(query);
       res.send(result);
     })
 
