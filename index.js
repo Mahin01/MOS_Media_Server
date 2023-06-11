@@ -26,12 +26,19 @@ async function run() {
 
     const usersCollection = client.db("mos-media").collection("users");
     const selectedClassesCollection = client.db("mos-media").collection("selected-class");
+    const allClassesCollection = client.db("mos-media").collection("Classes");
 
     //Api for fetch all users
     app.get("/users", async(req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
+
+    // API for fetching All classes
+    app.get("/classes", async(req, res) => {
+      const result = await allClassesCollection.find().toArray();
+      res.send(result);
+    })
 
     // Fetch selected class data by specific student 
     app.get("/selected-classes", async (req, res)=> {
