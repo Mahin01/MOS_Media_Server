@@ -8,7 +8,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hcrmfrb.mongodb.net/?retryWrites=true&w=majority`;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -49,6 +49,14 @@ async function run() {
     app.post("/selected-class", async (req, res) => {
       const selectedClass = req.body;
       const result = await selectedClassesCollection.insertOne(selectedClass);
+      res.send(result);
+    })
+
+    // Delete class from My selected class on student dashboard upon clicking the delete button
+    app.delete("/selected-class/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = { _id : new ObjectId(id)};
+      const result = selectedClassesCollection.deleteOne(query);
       res.send(result);
     })
 
