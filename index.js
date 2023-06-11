@@ -46,9 +46,18 @@ async function run() {
       if (req.query?.email) {
         query = { addedBy : req.query.email }
         }
-        console.log(query);
         const result = await selectedClassesCollection.find(query).toArray();
         res.send(result);
+    })
+
+    // API for getting Specific instructor classes
+    app.get("/classes", async(req, res) =>{
+      let query = {};
+      if(req.query?.email){
+        query = {InstructorEmail : req.query.email}
+      }
+      const result = await allClassesCollection.find(query).toArray();
+      res.send(result);
     })
 
     // Insert Registered User Data 
