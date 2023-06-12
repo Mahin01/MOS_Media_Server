@@ -2,6 +2,7 @@ const express = require("express");
 require('dotenv').config();
 const app = express();
 const cors = require("cors");
+const jwt = require('jsonwebtoken');
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -28,11 +29,29 @@ async function run() {
     const selectedClassesCollection = client.db("mos-media").collection("selected-class");
     const allClassesCollection = client.db("mos-media").collection("Classes");
 
+
+    app.post('/jwt', (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '1h' })
+      res.send({ token })
+    })
+
     //Api for fetch all users
     app.get("/users", async(req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
+
+     // API for getting Specific instructor classes
+     app.get("/classes", async (req, res) => {
+      let query = {};
+      if (req.query?.email) {
+        query = { InstructorEmail: req.query.email };
+      }
+      console.log(query);
+      const result = await allClassesCollection.find(query).toArray();
+      res.send(result);
+    });   
 
     // API for fetching All classes
     app.get("/classes", async(req, res) => {
@@ -48,17 +67,7 @@ async function run() {
         }
         const result = await selectedClassesCollection.find(query).toArray();
         res.send(result);
-    })
-
-    // API for getting Specific instructor classes
-    app.get("/classes", async(req, res) =>{
-      let query = {};
-      if(req.query?.email){
-        query = {InstructorEmail : req.query.email}
-      }
-      const result = await allClassesCollection.find(query).toArray();
-      res.send(result);
-    })
+    }) 
 
     // Insert Registered User Data 
     app.post('/users', async (req, res) => {
