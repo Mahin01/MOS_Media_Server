@@ -1,8 +1,8 @@
 const express = require("express");
-require('dotenv').config();
 const app = express();
 const cors = require("cors");
-const jwt = require('jsonwebtoken');
+var jwt = require('jsonwebtoken');
+require('dotenv').config();
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -12,19 +12,19 @@ app.use(express.json());
 const verifyJWT = (req, res, next) => {
   const authorization = req.headers.authorization;
   if (!authorization) {
-    return res.status(401).send({ error: true, message: 'unauthorized access' });
+    return res.status(401).json({ error: true, message: 'Unauthorized access' });
   }
   // bearer token
   const token = authorization.split(' ')[1];
 
   jwt.verify(token, process.env.SECRET_ACCESS_TOKEN, (err, decoded) => {
     if (err) {
-      return res.status(401).send({ error: true, message: 'unauthorized access' })
+      return res.status(401).json({ error: true, message: 'Unauthorized access' });
     }
     req.decoded = decoded;
     next();
-  })
-}
+  });
+};
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.hcrmfrb.mongodb.net/?retryWrites=true&w=majority`;
@@ -53,6 +53,17 @@ async function run() {
       res.send({ token })
     })
 
+     // Middleware for verifying Instructor
+     const verifyInstructor = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email }
+      const user = await usersCollection.findOne(query);
+      if (user?.role !== 'instructor') {
+        return res.status(403).send({ error: true, message: 'forbidden message' });
+      }
+      next();
+    }
+
     // Middleware for verifying admin
     const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
@@ -63,19 +74,6 @@ async function run() {
       }
       next();
     }
-
-    // Middleware for verifying Instructor
-    const verifyInstructor= async (req, res, next) => {
-      const email = req.decoded.email;
-      const query = { email: email }
-      const user = await usersCollection.findOne(query);
-      if (user?.role !== 'instructor') {
-        return res.status(403).send({ error: true, message: 'forbidden message' });
-      }
-      next();
-    }
-
-    // 
 
     //Api for fetch all users
     app.get("/users", async(req, res) => {
@@ -108,38 +106,32 @@ async function run() {
         }
         const result = await selectedClassesCollection.find(query).toArray();
         res.send(result);
-    }) 
+    });
 
-    // API for verifying Admin
-    app.get("/users/admin/:email", verifyJWT, async(req, res) => {
+     // Insert Registered User Data 
+     app.post('/users', async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+
+     // API for verifying Admin
+     app.get("/users/admin/:email", async(req, res) => {
       const email = req.params.email;
-      if(req.decoded.email !== email){
-        res.send({ admin: false})
-      }
       const query = {email: email};
       const user = await usersCollection.findOne(query);
       const result = {admin : user?.role === 'admin'};
       res.send(result);
     })
 
-    // API for verifying Instructor
-    app.get("/users/instructor/:email", verifyJWT, async(req, res) => {
-      const email = req.params.email;
-      if(req.decoded.email !== email){
-        res.send({ instructor : false})
-      }
-      const query = {email: email};
-      const user = await usersCollection.findOne(query);
-      const result = { instructor : user?.role === 'instructor'};
-      res.send(result);
-    })
-
-    // Insert Registered User Data 
-    app.post('/users', async (req, res) => {
-      const user = req.body;
-      const result = await usersCollection.insertOne(user);
-      res.send(result);
-    });
+      // API for verifying Instructor
+      app.get("/users/instructor/:email", verifyJWT, async(req, res) => {
+        const email = req.params.email;
+        const query = {email: email};
+        const user = await usersCollection.findOne(query);
+        const result = { instructor : user?.role === 'instructor'};
+        res.send(result);
+      })
 
     // Insert Add Class data to database by instructor
     app.post("/classes", async(req, res) => {
@@ -152,6 +144,20 @@ async function run() {
     app.post("/selected-class", async (req, res) => {
       const selectedClass = req.body;
       const result = await selectedClassesCollection.insertOne(selectedClass);
+      res.send(result);
+    })
+
+    // Make user admin Api
+    app.patch("/users/admin/:id", async(req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          role: 'admin'
+        },
+      };
+
+      const result = await usersCollection.updateOne(filter, updateDoc);
       res.send(result);
     })
 
