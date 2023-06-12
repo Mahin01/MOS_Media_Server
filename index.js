@@ -49,7 +49,7 @@ async function run() {
 
     app.post('/jwt', (req, res) => {
       const user = req.body;
-      const token = jwt.sign(user, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '1s' })
+      const token = jwt.sign(user, process.env.SECRET_ACCESS_TOKEN, { expiresIn: '1h' })
       res.send({ token })
     })
 
@@ -96,6 +96,18 @@ async function run() {
         const result = await selectedClassesCollection.find(query).toArray();
         res.send(result);
     }) 
+
+    // API for verifying Admin
+    app.get("/users/admin/:email", verifyJWT, async(req, res) => {
+      const email = req.params.email;
+      if(req.decoded.email !== email){
+        res.send({ admin: false})
+      }
+      const query = {email: email};
+      const user = await usersCollection.findOne(query);
+      const result = {admin : user?.role === 'admin'};
+      res.send(result);
+    })
 
     // Insert Registered User Data 
     app.post('/users', async (req, res) => {
