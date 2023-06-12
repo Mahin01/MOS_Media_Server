@@ -185,7 +185,7 @@ async function run() {
     });
 
     // Approve class & update class status Api
-    app.patch("/classes/admin/:id", async (req, res) => {
+    app.patch("/classes/admin/approve/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
@@ -198,7 +198,7 @@ async function run() {
     });
 
     // Deny class & update class status Api
-    app.patch("/classes/admin/:id", async (req, res) => {
+    app.patch("/classes/admin/deny/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
