@@ -173,6 +173,32 @@ async function run() {
       res.send(result);
     })
 
+    // Approve class & update class status Api
+    app.patch("/classes/admin/:id", async(req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: 'approved'
+        },
+      };
+      const result = await allClassesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
+    // Deny class & update class status Api
+    app.patch("/classes/admin/:id", async(req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          status: 'denied'
+        },
+      };
+      const result = await allClassesCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
     // Api for delete user data by admin from database
     app.delete("/users/:id", async(req, res) => {
       const id = req.params.id;
