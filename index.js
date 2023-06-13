@@ -105,14 +105,14 @@ async function run() {
 
     // API for fetching All classes
     app.get("/classes", async (req, res) => {
-      const result = await allClassesCollection.find().toArray();
+      const result = await allClassesCollection.find().limit(20).toArray();
       res.send(result);
     });
 
     // Fetch selected class data by specific student
-    app.get("/selected-classes", async (req, res) => {
+    app.get("/student/selected-classes", async (req, res) => {
       let query = {};
-      if (req.query?.email) {
+      if(req.query?.email){
         query = { addedBy: req.query.email };
       }
       const result = await selectedClassesCollection.find(query).toArray();
@@ -144,6 +144,14 @@ async function run() {
       res.send(result);
     });
 
+    // Api for getting specific selected class
+    app.get("/student/selected-class/:id", async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)};
+      const result = await selectedClassesCollection.findOne(query);
+      res.send(result);
+    })
+
     // Insert Add Class data to database by instructor
     app.post("/classes", async (req, res) => {
       const singleClass = req.body;
@@ -152,7 +160,7 @@ async function run() {
     });
 
     // Insert Selected Class Data by Students
-    app.post("/selected-class", async (req, res) => {
+    app.post("/student/selected-classes", async (req, res) => {
       const selectedClass = req.body;
       const result = await selectedClassesCollection.insertOne(selectedClass);
       res.send(result);
