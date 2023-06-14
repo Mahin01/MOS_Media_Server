@@ -111,6 +111,14 @@ async function run() {
       res.send(result);
     });
 
+     // API for getting instructor my classes
+     app.get("/instructor/myClasses", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const user = await allClassesCollection.find(query).toArray();
+      res.send(result);
+    });
+
     // Fetch selected class data by specific student
     app.get("/student/selected-classes", async (req, res) => {
       let query = {};
