@@ -266,9 +266,15 @@ async function run() {
       const payment = req.body;
       const insertResult = await paymentCollection.insertOne(payment);
       const id = payment.selected_class;
-      const query = { _id: new ObjectId(id) }
-      const deleteResult = await selectedClassesCollection.deleteOne(query)
-      res.send({ insertResult, deleteResult });
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          payment_status: true,
+        },
+      };
+      const updateResult = await selectedClassesCollection.updateOne(filter, updateDoc);
+      console.log(updateResult);
+      res.send({ insertResult, updateResult });
     })
 
 
