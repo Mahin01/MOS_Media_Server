@@ -95,12 +95,9 @@ async function run() {
     });
 
     // API for getting Specific instructor classes
-    app.get("/classes", async (req, res) => {
-      let query = {};
-      if (req.query?.email) {
-        query = { InstructorEmail: req.query.email };
-      }
-      console.log(query);
+    app.get("/instructor/myClasses/:email", async (req, res) => {
+      const email = req.params.email;
+      let query = {InstructorEmail : email};
       const result = await allClassesCollection.find(query).toArray();
       res.send(result);
     });
@@ -108,14 +105,6 @@ async function run() {
     // API for fetching All classes
     app.get("/classes", async (req, res) => {
       const result = await allClassesCollection.find().limit(20).toArray();
-      res.send(result);
-    });
-
-     // API for getting instructor my classes
-     app.get("/instructor/myClasses", async (req, res) => {
-      const email = req.params.email;
-      const query = { email: email };
-      const user = await allClassesCollection.find(query).toArray();
       res.send(result);
     });
 
