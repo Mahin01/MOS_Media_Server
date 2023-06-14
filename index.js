@@ -275,6 +275,11 @@ async function run() {
       const updateResult = await selectedClassesCollection.updateOne(filter, updateDoc);
       console.log(updateResult);
       res.send({ insertResult, updateResult });
+    });
+
+    app.get("/payment-history", async (req, res) => {
+      const result = await paymentCollection.find().toArray();
+      res.send(result);
     })
 
 
