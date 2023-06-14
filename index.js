@@ -52,6 +52,7 @@ async function run() {
       .db("mos-media")
       .collection("selected-class");
     const allClassesCollection = client.db("mos-media").collection("Classes");
+    const paymentCollection = client.db("mos-media").collection("payment-collection");
 
     app.post("/jwt", (req, res) => {
       const user = req.body;
@@ -244,20 +245,29 @@ async function run() {
     });
 
     // API For payment intent
-    app.post("/create-payment-intent", async (req, res) => {
+    app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const { price } = req.body;
       const amount = parseInt(price * 100);
-
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
         payment_method_types: ['card']
       });
-    
       res.send({
         clientSecret: paymentIntent.client_secret,
       });
     });
+
+    // Payment Related API
+    
+    // Insert payment info to database API
+     // payment related api
+     app.post('/payments', verifyJWT, async (req, res) => {
+      const payment = req.body;
+      const insertResult = await paymentCollection.insertOne(payment);
+      res.send({ insertResult });
+    })
+
 
     await client.db("admin").command({ ping: 1 });
     console.log(
